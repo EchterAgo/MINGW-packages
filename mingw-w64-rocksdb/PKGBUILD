@@ -4,7 +4,7 @@ _realname=rocksdb
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
 pkgver=6.7.3
-pkgrel=1
+pkgrel=2
 pkgdesc="A library that provides an embeddable, persistent key-value store for fast storage (mingw-w64)"
 arch=('any')
 url="https://rocksdb.org/"
@@ -14,16 +14,19 @@ depends=("${MINGW_PACKAGE_PREFIX}-bzip2"
          "${MINGW_PACKAGE_PREFIX}-lz4"
          "${MINGW_PACKAGE_PREFIX}-snappy"
          "${MINGW_PACKAGE_PREFIX}-zlib"
-         "${MINGW_PACKAGE_PREFIX}-zstd")
+         "${MINGW_PACKAGE_PREFIX}-zstd"
+         "${MINGW_PACKAGE_PREFIX}-jemalloc")
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake"
              "${MINGW_PACKAGE_PREFIX}-gcc")
 options=('staticlibs' 'strip')
 source=(${_realname}-${pkgver}.tar.gz::"https://github.com/facebook/${_realname}/archive/v${pkgver}.tar.gz"
+        "0001-Windows-disable-operator-new-delete-when-jemalloc-5-.patch"
         "0004-fix-generating-and-install-import-lib.patch"
         "0005-fix-cast-between-incompatible-pointers.patch"
         "0006-cmake-build.patch"
         "0007-mingw-fix-build-flags.patch")
 sha256sums=('c4d1397b58e4801b5fd7c3dd9175e6ae84541119cbebb739fe17d998f1829e81'
+            'f5c820492dbd2ca62b7b02509088586ce7d5da61a374fdf7c754e6b19a50b6b4'
             '4ac7ef7039284f8bed32123e91405e6fbb4af91e70d059cbc2c973152f575960'
             'f0ce06542820a45eee74316f4b84a921f266032666a07e25284680ad1cc041da'
             'e3ca227ef5751fe558135720ee911c9747fb77a6d6b84a2f4001ccff7c224ee1'
@@ -31,6 +34,7 @@ sha256sums=('c4d1397b58e4801b5fd7c3dd9175e6ae84541119cbebb739fe17d998f1829e81'
 
 prepare() {
   cd "${srcdir}/${_realname}-${pkgver}"
+  patch -p1 -i "${srcdir}/0001-Windows-disable-operator-new-delete-when-jemalloc-5-.patch"
   patch -p1 -i "${srcdir}/0004-fix-generating-and-install-import-lib.patch"
   patch -p1 -i "${srcdir}/0005-fix-cast-between-incompatible-pointers.patch"
   patch -p1 -i "${srcdir}/0006-cmake-build.patch"
@@ -61,6 +65,7 @@ build() {
     -DWITH_ZSTD=ON \
     -DWITH_TBB=OFF \
     -DWITH_SNAPPY=ON \
+    -DWITH_JEMALLOC=ON \
     -DUSE_RTTI=ON \
     -DPORTABLE=ON \
     -DROCKSDB_INSTALL_ON_WINDOWS=ON \
